@@ -5,15 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AetherOS</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ff9800%22 stroke-width=%222.5%22><path d=%22M14 4l6 6M18 2a11.5 11.5 0 0 0-8 3.5L4 11.5M22 6a11.5 11.5 0 0 1-3.5 8L12.5 20M3 21l9-9%22/></svg>">
-  
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Normal.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Semibold.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/misans@4.0.0/lib/Normal/MiSans-Bold.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-theme="industrial" data-tray="matte">
@@ -23,10 +20,9 @@
     <div class="screen-scanline"></div>
   </div>
 
-  <!-- Top System Bar (Hard Boxed Corners) -->
   <header id="sys-topbar">
     <div class="bar-left">
-      <button id="pickaxe-menu-trigger" title="Root Menu (Win Key)">
+      <button id="pickaxe-menu-trigger" title="Root Menu">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square">
           <path d="M14 4l6 6" />
           <path d="M18 2a11.5 11.5 0 0 0-8 3.5L4 11.5" />
@@ -55,8 +51,19 @@
     </div>
   </header>
 
-  <!-- Workspace Surface -->
   <main id="workspace">
+    <a href="https://madebyadnan.xyz" target="_blank" rel="noopener noreferrer" class="desktop-portal-badge">
+      <div class="portal-box">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+      </div>
+      <div class="portal-info">
+        <span class="portal-title">MADE BY ADNAN</span>
+        <span class="portal-sub">madebyadnan.xyz ↗</span>
+      </div>
+    </a>
 
     <div id="system-hud">
       <div class="hud-top">
@@ -77,19 +84,16 @@
       </div>
     </div>
 
-
     <div id="window-container"></div>
   </main>
 
-  <!-- Side Toggle Button for Dock -->
-  <button id="dock-panel-toggle" title="Toggle Shelf">
+  <button id="dock-panel-toggle">
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M3 3h18v18H3z" />
       <path d="M3 15h18" />
     </svg>
   </button>
 
-  <!-- Boxed Context Menu -->
   <div id="ctx-menu" class="hidden">
     <div class="ctx-row" data-action="browser">Web Navigator</div>
     <div class="ctx-row" data-action="notes">Scratchpad</div>
@@ -100,32 +104,57 @@
     <div class="ctx-row" data-action="reload">Reload Environment</div>
   </div>
 
-  <!-- Root Dropdown Menu -->
   <div id="root-menu" class="hidden">
     <div class="root-header">
       <div class="root-user-box">ADNAN</div>
       <div class="root-user-meta">
-        <strong>Adnan A. Laskar</strong>
-        <small>System Architect</small>
+        <strong>adnan@aether</strong>
+        <small>Session #001 · Local Host</small>
       </div>
     </div>
     <div class="root-items">
-      <div class="root-row" data-launch="browser">01 // Web Browser</div>
-      <div class="root-row" data-launch="camera">02 // Optical Sensor</div>
-      <div class="root-row" data-launch="calc">03 // Arithmetic Unit</div>
-      <div class="root-row" data-launch="calendar">04 // Chrono Calendar</div>
-      <div class="root-row" data-launch="themes">05 // Theme / Tray Settings</div>
-      <div class="root-row" data-launch="terminal">06 // Virtual Terminal</div>
-      <div class="root-row" data-launch="editor">07 // Document Editor</div>
-      <div class="root-row" data-launch="files">08 // Local Storage Drive</div>
-      <div class="root-row" data-launch="painter">09 // Bit-Painter</div>
+      <div class="root-row" data-launch="browser">
+        <span class="row-cmd">nav</span>
+        <span class="row-label">Web Browser</span>
+      </div>
+      <div class="root-row" data-launch="camera">
+        <span class="row-cmd">cam</span>
+        <span class="row-label">Camera Feed</span>
+      </div>
+      <div class="root-row" data-launch="calc">
+        <span class="row-cmd">calc</span>
+        <span class="row-label">Calculator</span>
+      </div>
+      <div class="root-row" data-launch="calendar">
+        <span class="row-cmd">cal</span>
+        <span class="row-label">Calendar</span>
+      </div>
+      <div class="root-row" data-launch="themes">
+        <span class="row-cmd">conf</span>
+        <span class="row-label">Themes & Wallpaper</span>
+      </div>
+      <div class="root-row" data-launch="terminal">
+        <span class="row-cmd">sh</span>
+        <span class="row-label">Terminal</span>
+      </div>
+      <div class="root-row" data-launch="editor">
+        <span class="row-cmd">edit</span>
+        <span class="row-label">Scratchpad</span>
+      </div>
+      <div class="root-row" data-launch="files">
+        <span class="row-cmd">fs</span>
+        <span class="row-label">File Storage</span>
+      </div>
+      <div class="root-row" data-launch="painter">
+        <span class="row-cmd">draw</span>
+        <span class="row-label">Bit Painter</span>
+      </div>
     </div>
     <div class="root-footer">
-      <button id="reboot-trigger">RESTART SESSION</button>
+      <button id="reboot-trigger">REBOOT DESKTOP</button>
     </div>
   </div>
 
-  <!-- Boxed Industrial Bottom Dock -->
   <footer id="dock-shelf">
     <div class="dock-shelf-inner">
       <button class="dock-tile" data-launch="browser" title="Web Browser">

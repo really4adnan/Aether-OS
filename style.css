@@ -1,10 +1,9 @@
-
 :root {
-  --radius-box: 0px; 
+  --radius-box: 0px;
 }
 
 body[data-theme="industrial"] {
-  --bg-primary: #0a0c10;
+  --bg-primary: #090b0e;
   --panel-fill: #11141a;
   --panel-border: #232834;
   --accent: #ff9800;
@@ -25,7 +24,6 @@ body[data-theme="phosphor"] {
   --win-head: #0e1d10;
 }
 
-/* Palette 3: Tactical Navy */
 body[data-theme="tactical"] {
   --bg-primary: #060b14;
   --panel-fill: #0c1424;
@@ -37,7 +35,6 @@ body[data-theme="tactical"] {
   --win-head: #101c33;
 }
 
-/* Palette 4: Monolith Crimson */
 body[data-theme="monolith"] {
   --bg-primary: #0e0708;
   --panel-fill: #180d0f;
@@ -49,13 +46,11 @@ body[data-theme="monolith"] {
   --win-head: #221215;
 }
 
-
 body[data-tray="matte"] {
   --bar-fill: var(--panel-fill);
   --bar-border: var(--panel-border);
   --box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.7);
 }
-
 
 body[data-tray="cyber"] {
   --bar-fill: rgba(10, 12, 16, 0.95);
@@ -69,7 +64,6 @@ body[data-tray="monolith"] {
   --box-shadow: 6px 6px 0px var(--accent);
 }
 
-/* Reset */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -87,7 +81,6 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Background Layer */
 #canvas-wrap {
   position: fixed;
   inset: 0;
@@ -114,7 +107,6 @@ body {
   pointer-events: none;
 }
 
-/* Top System Bar */
 #sys-topbar {
   position: fixed;
   top: 0;
@@ -214,7 +206,6 @@ body {
   color: var(--text-bright);
 }
 
-/* Workspace Surface */
 #workspace {
   position: absolute;
   top: 34px;
@@ -224,6 +215,58 @@ body {
   z-index: 1;
 }
 
+.desktop-portal-badge {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bar-fill);
+  border: 1px solid var(--bar-border);
+  box-shadow: var(--box-shadow);
+  padding: 0.5rem 0.85rem;
+  text-decoration: none;
+  color: var(--text-bright);
+  border-radius: var(--radius-box);
+  cursor: pointer;
+  z-index: 10;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.desktop-portal-badge:hover {
+  border-color: var(--accent);
+  background: var(--win-head);
+}
+
+.portal-box {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.portal-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--text-bright);
+}
+
+.portal-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--accent);
+}
+
+#system-hud {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
@@ -295,7 +338,6 @@ body {
   transition: width 0.3s;
 }
 
-/* Boxed Window Architecture */
 .aether-win {
   position: absolute;
   background: var(--panel-fill);
@@ -367,7 +409,6 @@ body {
   user-select: text;
 }
 
-/* Industrial Floating Dock Shelf */
 #dock-shelf {
   position: fixed;
   bottom: 10px;
@@ -413,7 +454,6 @@ body {
   color: var(--accent);
 }
 
-/* Side Toggle Switch */
 #dock-panel-toggle {
   position: fixed;
   bottom: 15px;
@@ -435,7 +475,6 @@ body {
   border-color: var(--accent);
 }
 
-/* Root Launch Dropdown Menu */
 #root-menu {
   position: fixed;
   top: 36px;
@@ -481,20 +520,41 @@ body {
   margin: 0.5rem 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .root-row {
-  padding: 0.35rem 0.5rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.6rem;
   cursor: pointer;
+  border: 1px solid transparent;
   border-radius: var(--radius-box);
 }
 
 .root-row:hover {
   background: var(--win-head);
+  border-color: var(--panel-border);
+}
+
+.root-row:hover .row-cmd {
   color: var(--accent);
+}
+
+.row-cmd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 32px;
+}
+
+.row-label {
+  font-family: 'MiSans Latin', 'MiSans', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text-bright);
 }
 
 .root-footer {
@@ -520,7 +580,6 @@ body {
   border-color: #e11d48;
 }
 
-/* Boxed Right Click Context Menu */
 #ctx-menu {
   position: fixed;
   width: 175px;
@@ -551,7 +610,6 @@ body {
   margin: 3px 0;
 }
 
-/* App: Terminal */
 .term-wrap {
   height: 100%;
   display: flex;
@@ -593,7 +651,6 @@ body {
   outline: none;
 }
 
-/* App: Browser */
 .browser-view {
   display: flex;
   flex-direction: column;
@@ -629,7 +686,6 @@ body {
   border-radius: var(--radius-box);
 }
 
-/* App: Calculator */
 .calc-table {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -673,7 +729,6 @@ body {
   color: var(--accent);
 }
 
-/* App: Calendar */
 .cal-container {
   display: flex;
   flex-direction: column;
@@ -716,7 +771,6 @@ body {
   border-color: var(--accent);
 }
 
-/* App: Theme Studio */
 .theme-section-tag {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem;
@@ -748,7 +802,6 @@ body {
   color: var(--accent);
 }
 
-/* Base Utility Button */
 .ui-action-btn {
   background: var(--accent);
   border: 1px solid var(--accent);

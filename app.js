@@ -1,10 +1,3 @@
-/**
- * AETHER-OS WORKSTATION ENGINE
- * Handcrafted Core - Boxed Geometry, Matrix / Grid Canvas,
- * Persistent LocalStorage Drivers, and Hardware Telemetry.
- */
-
-// Core Session State
 const Session = {
   theme: localStorage.getItem("AETHER_THEME") || "industrial",
   trayStyle: localStorage.getItem("AETHER_TRAY") || "matte",
@@ -14,7 +7,6 @@ const Session = {
   mediaStream: null
 };
 
-// --- REAL-TIME TELEMETRY & CLOCK ---
 function bootTelemetry() {
   const topClock = document.getElementById("top-clock-val");
   const topRam = document.getElementById("top-ram-val");
@@ -32,7 +24,6 @@ function bootTelemetry() {
     if (hudClock) hudClock.textContent = timeStr;
     if (hudCalendar) hudCalendar.textContent = dateStr;
 
-    // Small realistic memory fluctuations
     const delta = (Math.random() * 0.8 - 0.4).toFixed(1);
     Session.ramAllocated = Math.min(192, Math.max(38, (parseFloat(Session.ramAllocated) + parseFloat(delta)).toFixed(1)));
 
@@ -45,7 +36,6 @@ function bootTelemetry() {
   refresh();
 }
 
-// --- WALLPAPER & GRID ENGINE ---
 function bootWallpaper() {
   const canvas = document.getElementById("bg-canvas");
   const ctx = canvas.getContext("2d");
@@ -57,14 +47,19 @@ function bootWallpaper() {
   window.addEventListener("resize", onResize);
   onResize();
 
-  // Matrix Stream Setup
   const charSet = "01010123456789ABCDEF!@#$%&*";
   const step = 14;
   let cols = Math.floor(window.innerWidth / step);
   let drops = Array(cols).fill(1);
 
-  // Tactical Grid Setup
   let gridOffset = 0;
+
+  const dust = Array.from({ length: 45 }, () => ({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    size: Math.random() * 1.5 + 0.5,
+    speed: Math.random() * 0.3 + 0.1
+  }));
 
   function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -84,25 +79,28 @@ function bootWallpaper() {
         drops[i]++;
       }
     } else if (Session.theme === "industrial") {
-      // Tech Blueprint Grid
-      ctx.strokeStyle = "rgba(35, 40, 52, 0.45)";
-      ctx.lineWidth = 1;
-      const size = 36;
+      ctx.fillStyle = "#090b0e";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      for (let x = 0; x < canvas.width; x += size) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += size) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
+      const grad = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2, 80,
+        canvas.width / 2, canvas.height / 2, canvas.width
+      );
+      grad.addColorStop(0, "rgba(255, 152, 0, 0.04)");
+      grad.addColorStop(1, "rgba(0, 0, 0, 0.75)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "rgba(255, 152, 0, 0.45)";
+      dust.forEach(d => {
+        ctx.fillRect(d.x, d.y, d.size, d.size);
+        d.y -= d.speed;
+        if (d.y < 0) {
+          d.y = canvas.height;
+          d.x = Math.random() * canvas.width;
+        }
+      });
     } else if (Session.theme === "tactical") {
-      // Horizon Perspective Grid
       ctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
       ctx.lineWidth = 1;
       const horizon = canvas.height * 0.6;
@@ -121,7 +119,6 @@ function bootWallpaper() {
         ctx.stroke();
       }
     } else if (Session.theme === "monolith") {
-      // Pure deep star drift
       ctx.fillStyle = "#f43f5e";
       for (let i = 0; i < 20; i++) {
         const px = (Math.sin(i * 99 + Date.now() * 0.0002) * 0.5 + 0.5) * canvas.width;
@@ -149,7 +146,6 @@ function updateTrayStyle(styleName) {
   localStorage.setItem("AETHER_TRAY", styleName);
 }
 
-// --- WINDOW MANAGER SUBSYSTEM ---
 class WindowEngine {
   constructor() {
     this.container = document.getElementById("window-container");
@@ -254,7 +250,6 @@ class WindowEngine {
   }
 }
 
-// --- APPLICATIONS DIRECTORY ---
 const Catalog = {
   browser(body) {
     body.innerHTML = `
@@ -503,7 +498,6 @@ const Catalog = {
   }
 };
 
-// --- SUBSYSTEM INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
   const Engine = new WindowEngine();
   bootTelemetry();
@@ -525,18 +519,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Bind Launch Controls
   document.querySelectorAll("[data-launch]").forEach(btn => {
     btn.addEventListener("click", () => executeApp(btn.dataset.launch));
   });
 
-  // Dock Shelf Toggle
   const dock = document.getElementById("dock-shelf");
   document.getElementById("dock-panel-toggle").onclick = () => {
     dock.classList.toggle("dock-closed");
   };
 
-  // Root Menu Toggle
   const rootBtn = document.getElementById("pickaxe-menu-trigger");
   const rootMenu = document.getElementById("root-menu");
 
@@ -557,7 +548,6 @@ document.addEventListener("DOMContentLoaded", () => {
   rootMenu.addEventListener("click", (e) => e.stopPropagation());
   document.getElementById("reboot-trigger").onclick = () => window.location.reload();
 
-  // Desktop Context Menu
   const ctx = document.getElementById("ctx-menu");
   document.getElementById("workspace").addEventListener("contextmenu", (e) => {
     e.preventDefault();
@@ -580,6 +570,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Open Themes app on boot
   executeApp("themes");
 });
