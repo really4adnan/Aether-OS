@@ -1,7 +1,6 @@
 const Session = {
   theme: localStorage.getItem("AETHER_THEME") || "industrial",
   trayStyle: localStorage.getItem("AETHER_TRAY") || "matte",
-  ramAllocated: 44.8,
   activeWindowId: null,
   animFrameId: null,
   mediaStream: null
@@ -9,11 +8,8 @@ const Session = {
 
 function bootTelemetry() {
   const topClock = document.getElementById("top-clock-val");
-  const topRam = document.getElementById("top-ram-val");
   const hudClock = document.getElementById("hud-clock");
   const hudCalendar = document.getElementById("hud-calendar");
-  const hudRamText = document.getElementById("hud-ram-text");
-  const hudRamBar = document.getElementById("hud-ram-bar");
 
   function refresh() {
     const d = new Date();
@@ -23,13 +19,6 @@ function bootTelemetry() {
     if (topClock) topClock.textContent = timeStr;
     if (hudClock) hudClock.textContent = timeStr;
     if (hudCalendar) hudCalendar.textContent = dateStr;
-
-    const delta = (Math.random() * 0.8 - 0.4).toFixed(1);
-    Session.ramAllocated = Math.min(192, Math.max(38, (parseFloat(Session.ramAllocated) + parseFloat(delta)).toFixed(1)));
-
-    if (topRam) topRam.textContent = `${Session.ramAllocated} MB`;
-    if (hudRamText) hudRamText.textContent = `${Session.ramAllocated} / 512 MB`;
-    if (hudRamBar) hudRamBar.style.width = `${(Session.ramAllocated / 512) * 100}%`;
   }
 
   setInterval(refresh, 1000);
@@ -38,6 +27,7 @@ function bootTelemetry() {
 
 function bootWallpaper() {
   const canvas = document.getElementById("bg-canvas");
+  if (!canvas) return;
   const ctx = canvas.getContext("2d");
 
   function onResize() {
@@ -47,84 +37,50 @@ function bootWallpaper() {
   window.addEventListener("resize", onResize);
   onResize();
 
-  const charSet = "01010123456789ABCDEF!@#$%&*";
-  const step = 14;
-  let cols = Math.floor(window.innerWidth / step);
-  let drops = Array(cols).fill(1);
-
-  let gridOffset = 0;
-
-  const dust = Array.from({ length: 45 }, () => ({
-    x: Math.random() * window.innerWidth,
-    y: Math.random() * window.innerHeight,
-    size: Math.random() * 1.5 + 0.5,
-    speed: Math.random() * 0.3 + 0.1
-  }));
+  const step = 28;
 
   function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (Session.theme === "phosphor") {
-      ctx.fillStyle = "rgba(4, 8, 4, 0.2)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#22c55e";
-      ctx.font = `${step}px monospace`;
-
-      for (let i = 0; i < drops.length; i++) {
-        const txt = charSet[Math.floor(Math.random() * charSet.length)];
-        ctx.fillText(txt, i * step, drops[i] * step);
-        if (drops[i] * step > canvas.height && Math.random() > 0.98) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    } else if (Session.theme === "industrial") {
-      ctx.fillStyle = "#090b0e";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const grad = ctx.createRadialGradient(
-        canvas.width / 2, canvas.height / 2, 80,
-        canvas.width / 2, canvas.height / 2, canvas.width
-      );
-      grad.addColorStop(0, "rgba(255, 152, 0, 0.04)");
-      grad.addColorStop(1, "rgba(0, 0, 0, 0.75)");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "rgba(255, 152, 0, 0.45)";
-      dust.forEach(d => {
-        ctx.fillRect(d.x, d.y, d.size, d.size);
-        d.y -= d.speed;
-        if (d.y < 0) {
-          d.y = canvas.height;
-          d.x = Math.random() * canvas.width;
-        }
-      });
-    } else if (Session.theme === "tactical") {
-      ctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
+      ctx.strokeStyle = "rgba(34, 197, 94, 0.08)";
       ctx.lineWidth = 1;
-      const horizon = canvas.height * 0.6;
-
-      gridOffset = (gridOffset + 0.6) % 24;
-      for (let y = horizon; y < canvas.height; y += 20) {
+      for (let x = 0; x < canvas.width; x += step) {
         ctx.beginPath();
-        ctx.moveTo(0, y + gridOffset);
-        ctx.lineTo(canvas.width, y + gridOffset);
-        ctx.stroke();
-      }
-      for (let x = -canvas.width; x < canvas.width * 2; x += 80) {
-        ctx.beginPath();
-        ctx.moveTo(canvas.width / 2, horizon);
+        ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
         ctx.stroke();
       }
-    } else if (Session.theme === "monolith") {
-      ctx.fillStyle = "#f43f5e";
-      for (let i = 0; i < 20; i++) {
-        const px = (Math.sin(i * 99 + Date.now() * 0.0002) * 0.5 + 0.5) * canvas.width;
-        const py = (Math.cos(i * 33 + Date.now() * 0.0001) * 0.5 + 0.5) * canvas.height;
-        ctx.fillRect(px, py, 2, 2);
+    } else if (Session.theme === "industrial") {
+      ctx.fillStyle = "#0a0d12";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = "rgba(255, 152, 0, 0.04)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
       }
+      for (let y = 0; y < canvas.height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    } else if (Session.theme === "tactical") {
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.06)";
+      ctx.lineWidth = 1;
+      for (let y = 0; y < canvas.height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    } else if (Session.theme === "monolith") {
+      ctx.fillStyle = "#0d0a0b";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     Session.animFrameId = requestAnimationFrame(loop);
@@ -162,18 +118,18 @@ class WindowEngine {
     const frame = document.createElement("div");
     frame.className = "aether-win active";
     frame.id = `win-node-${id}`;
-    frame.style.width = `${width}px`;
-    frame.style.height = `${height}px`;
-    frame.style.top = `${50 + this.pool.size * 22}px`;
-    frame.style.left = `${60 + this.pool.size * 22}px`;
+    frame.style.width = `${Math.min(width, window.innerWidth - 40)}px`;
+    frame.style.height = `${Math.min(height, window.innerHeight - 80)}px`;
+    frame.style.top = `${50 + (this.pool.size * 20) % 120}px`;
+    frame.style.left = `${50 + (this.pool.size * 20) % 120}px`;
     frame.style.zIndex = ++this.depth;
 
     frame.innerHTML = `
       <div class="win-titlebar">
         <div class="win-controls">
-          <button class="ctrl-btn ctrl-close" title="Terminate">×</button>
-          <button class="ctrl-btn ctrl-min" title="Hide">−</button>
-          <button class="ctrl-btn ctrl-max" title="Expand">□</button>
+          <button class="ctrl-btn ctrl-close" title="Close">×</button>
+          <button class="ctrl-btn ctrl-min" title="Minimize">−</button>
+          <button class="ctrl-btn ctrl-max" title="Maximize">□</button>
         </div>
         <div class="win-caption">${title.toUpperCase()}</div>
         <div style="width: 45px;"></div>
@@ -199,8 +155,8 @@ class WindowEngine {
     frame.querySelector(".ctrl-max").onclick = (e) => {
       e.stopPropagation();
       const isMax = frame.style.width === "100vw";
-      frame.style.top = isMax ? "70px" : "34px";
-      frame.style.left = isMax ? "70px" : "0px";
+      frame.style.top = isMax ? "60px" : "34px";
+      frame.style.left = isMax ? "60px" : "0px";
       frame.style.width = isMax ? `${width}px` : "100vw";
       frame.style.height = isMax ? `${height}px` : "calc(100vh - 34px)";
     };
@@ -243,8 +199,12 @@ class WindowEngine {
     };
     document.addEventListener("mousemove", (e) => {
       if (!moving) return;
-      frame.style.left = `${e.clientX - ox}px`;
-      frame.style.top = `${Math.max(34, e.clientY - oy)}px`;
+      const maxLeft = window.innerWidth - 60;
+      const maxTop = window.innerHeight - 60;
+      const nextLeft = Math.max(0, Math.min(e.clientX - ox, maxLeft));
+      const nextTop = Math.max(34, Math.min(e.clientY - oy, maxTop));
+      frame.style.left = `${nextLeft}px`;
+      frame.style.top = `${nextTop}px`;
     });
     document.addEventListener("mouseup", () => moving = false);
   }
@@ -255,10 +215,10 @@ const Catalog = {
     body.innerHTML = `
       <div class="browser-view">
         <div class="browser-bar">
-          <input type="text" id="url-in" class="browser-input" value="https://www.bing.com" />
-          <button class="ui-action-btn" id="url-exec">FETCH</button>
+          <input type="text" id="url-in" class="browser-input" value="https://www.wikipedia.org" />
+          <button class="ui-action-btn" id="url-exec">GO</button>
         </div>
-        <iframe id="web-frame" class="browser-frame" src="https://www.bing.com"></iframe>
+        <iframe id="web-frame" class="browser-frame" src="https://www.wikipedia.org"></iframe>
       </div>
     `;
     const input = body.querySelector("#url-in");
@@ -266,7 +226,7 @@ const Catalog = {
     body.querySelector("#url-exec").onclick = () => {
       let target = input.value.trim();
       if (!target.startsWith("http://") && !target.startsWith("https://")) {
-        target = "https://www.google.com/search?q=" + encodeURIComponent(target);
+        target = "https://" + target;
       }
       frame.src = target;
     };
@@ -278,7 +238,7 @@ const Catalog = {
         <video id="webcam" style="width:100%; height:230px; background:#000; border:1px solid var(--panel-border); object-fit:cover;" autoplay playsinline></video>
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <button class="ui-action-btn" id="btn-snap">SNAPSHOT</button>
-          <span style="font-size:0.7rem; font-family:'JetBrains Mono'; color:var(--text-muted);">STREAM // ACTIVE</span>
+          <span style="font-size:0.7rem; font-family:'JetBrains Mono'; color:var(--text-muted);">WEBCAM API</span>
         </div>
         <canvas id="snap-sink" class="hidden"></canvas>
       </div>
@@ -289,7 +249,9 @@ const Catalog = {
         Session.mediaStream = stream;
         video.srcObject = stream;
       })
-      .catch(() => alert("Hardware stream unavailable."));
+      .catch(() => {
+        video.insertAdjacentHTML("afterend", "<p style='color:#e11d48; font-size:0.75rem;'>Hardware stream unavailable or permission denied.</p>");
+      });
 
     body.querySelector("#btn-snap").onclick = () => {
       const sink = body.querySelector("#snap-sink");
@@ -297,7 +259,7 @@ const Catalog = {
       sink.height = video.videoHeight || 480;
       sink.getContext("2d").drawImage(video, 0, 0);
       const a = document.createElement("a");
-      a.download = `aether-capture-${Date.now()}.png`;
+      a.download = `aether-capture.png`;
       a.href = sink.toDataURL();
       a.click();
     };
@@ -308,7 +270,7 @@ const Catalog = {
       <div style="display:flex; flex-direction:column; height:100%; gap:6px;">
         <div class="calc-display" id="calc-val">0</div>
         <div class="calc-table">
-          <button class="c-btn op" data-v="CLR">CLR</button>
+          <button class="c-btn op" data-v="CLR">C</button>
           <button class="c-btn op" data-v="(">(</button>
           <button class="c-btn op" data-v=")">)</button>
           <button class="c-btn op" data-v="/">/</button>
@@ -339,9 +301,14 @@ const Catalog = {
         if (val === "CLR") state = "";
         else if (val === "BS") state = state.slice(0, -1);
         else if (val === "=") {
-          try { state = String(Function(`'use strict'; return (${state})`)()); }
-          catch { state = "ERR"; }
-        } else state += val;
+          try {
+            state = String(Function(`'use strict'; return (${state})`)());
+          } catch {
+            state = "ERR";
+          }
+        } else {
+          state += val;
+        }
         screen.textContent = state || "0";
       };
     });
@@ -362,7 +329,7 @@ const Catalog = {
 
     body.innerHTML = `
       <div class="cal-container">
-        <div class="cal-header-bar">${month} // ${year}</div>
+        <div class="cal-header-bar">${month} ${year}</div>
         <div class="cal-matrix">
           <div class="head">SU</div><div class="head">MO</div>
           <div class="head">TU</div><div class="head">WE</div>
@@ -377,19 +344,19 @@ const Catalog = {
   themes(body) {
     body.innerHTML = `
       <div>
-        <div class="theme-section-tag">// SYSTEM PALETTE</div>
+        <div class="theme-section-tag">PALETTES</div>
         <div class="studio-table">
-          <button class="s-btn" data-t="industrial">01 // Industrial Amber</button>
-          <button class="s-btn" data-t="phosphor">02 // Phosphor Matrix</button>
-          <button class="s-btn" data-t="tactical">03 // Tactical Navy</button>
-          <button class="s-btn" data-t="monolith">04 // Monolith Crimson</button>
+          <button class="s-btn" data-t="industrial">Industrial Amber</button>
+          <button class="s-btn" data-t="phosphor">Phosphor Green</button>
+          <button class="s-btn" data-t="tactical">Tactical Blue</button>
+          <button class="s-btn" data-t="monolith">Monolith Crimson</button>
         </div>
 
-        <div class="theme-section-tag" style="margin-top:1rem;">// TRAY INTERFACE GEOMETRY</div>
+        <div class="theme-section-tag" style="margin-top:1rem;">TRAY STYLES</div>
         <div class="studio-table">
-          <button class="s-btn" data-s="matte">MODE // Matte Boxed</button>
-          <button class="s-btn" data-s="cyber">MODE // Cyber Grid</button>
-          <button class="s-btn" data-s="monolith">MODE // Monolith Solid</button>
+          <button class="s-btn" data-s="matte">Matte Slate</button>
+          <button class="s-btn" data-s="cyber">High-Contrast Border</button>
+          <button class="s-btn" data-s="monolith">Solid Monolith</button>
         </div>
       </div>
     `;
@@ -401,11 +368,11 @@ const Catalog = {
     body.innerHTML = `
       <div class="term-wrap">
         <div class="term-scroll" id="term-out">
-          <div>Aether-OS Kernel [x86_64 Node Engine]</div>
-          <div>Type 'help' for executable instructions.</div>
+          <div>Aether-OS Shell v2.4 (Vanilla JS)</div>
+          <div>Type 'help' to view available commands.</div>
         </div>
         <div class="term-in-row">
-          <span class="term-prompt">root@node:~$</span>
+          <span class="term-prompt">&gt;</span>
           <input type="text" class="term-input" id="term-input" autofocus />
         </div>
       </div>
@@ -417,16 +384,16 @@ const Catalog = {
       if (e.key === "Enter") {
         const cmd = inp.value.trim().toLowerCase();
         const line = document.createElement("div");
-        line.innerHTML = `<span class="term-prompt">root@node:~$</span> ${cmd}`;
+        line.innerHTML = `<span class="term-prompt">&gt;</span> ${cmd}`;
         out.appendChild(line);
 
         const res = document.createElement("div");
-        if (cmd === "help") res.textContent = "Commands: help, clear, date, mem, reload";
+        if (cmd === "help") res.textContent = "Available: help, clear, date, echo [text], reload";
         else if (cmd === "clear") { out.innerHTML = ""; inp.value = ""; return; }
-        else if (cmd === "date") res.textContent = new Date().toISOString();
-        else if (cmd === "mem") res.textContent = `Heap: ${Session.ramAllocated} MB / 512 MB`;
+        else if (cmd === "date") res.textContent = new Date().toString();
+        else if (cmd.startsWith("echo ")) res.textContent = cmd.slice(5);
         else if (cmd === "reload") { window.location.reload(); return; }
-        else res.textContent = cmd ? `Unknown instruction: '${cmd}'` : "";
+        else res.textContent = cmd ? `Unknown command: ${cmd}` : "";
 
         out.appendChild(res);
         inp.value = "";
@@ -436,33 +403,33 @@ const Catalog = {
   },
 
   editor(body) {
-    const disk = localStorage.getItem("AETHER_STORAGE_NOTES") || "Aether-OS persistent document storage.";
+    const saved = localStorage.getItem("AETHER_STORAGE_NOTES") || "Aether-OS scratchpad notes.";
     body.innerHTML = `
       <div style="display:flex; flex-direction:column; height:100%; gap:6px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:0.7rem; font-family:'JetBrains Mono'; color:var(--text-muted);">/user/storage/notes.txt</span>
-          <button class="ui-action-btn" id="note-write">SYNC DISK</button>
+          <span style="font-size:0.7rem; font-family:'JetBrains Mono'; color:var(--text-muted);">localStorage/notes.txt</span>
+          <button class="ui-action-btn" id="note-write">SAVE</button>
         </div>
-        <textarea id="note-buffer" style="flex:1; background:#000; border:1px solid var(--panel-border); border-radius:var(--radius-box); color:var(--text-bright); font-family:'JetBrains Mono'; font-size:0.78rem; padding:0.6rem; outline:none; resize:none;">${disk}</textarea>
+        <textarea id="note-buffer" style="flex:1; background:#000; border:1px solid var(--panel-border); border-radius:var(--radius-box); color:var(--text-bright); font-family:'JetBrains Mono'; font-size:0.78rem; padding:0.6rem; outline:none; resize:none;">${saved}</textarea>
       </div>
     `;
     body.querySelector("#note-write").onclick = () => {
       localStorage.setItem("AETHER_STORAGE_NOTES", body.querySelector("#note-buffer").value);
-      alert("Committed to browser local storage.");
+      alert("Saved to browser storage.");
     };
   },
 
   files(body, engine) {
     body.innerHTML = `
-      <div style="font-family:'JetBrains Mono'; font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">INDEX OF /user/storage</div>
+      <div style="font-family:'JetBrains Mono'; font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">VIRTUAL FILESYSTEM</div>
       <div style="display:flex; gap:8px;">
         <div id="file-item" style="border:1px solid var(--panel-border); padding:8px 12px; cursor:pointer; font-family:'JetBrains Mono'; font-size:0.75rem; background:var(--win-head);">
-          📄 notes.txt
+          notes.txt
         </div>
       </div>
     `;
     body.querySelector("#file-item").onclick = () => {
-      engine.mount({ id: "editor", title: "Document Editor", construct: Catalog.editor });
+      engine.mount({ id: "editor", title: "Scratchpad", construct: Catalog.editor });
     };
   },
 
@@ -472,7 +439,7 @@ const Catalog = {
         <div style="display:flex; gap:6px; align-items:center;">
           <input type="color" id="draw-color" value="#ff9800" style="background:transparent; border:none; cursor:pointer;" />
           <input type="range" id="draw-size" min="1" max="24" value="3" />
-          <button class="ui-action-btn" id="draw-wipe">WIPE</button>
+          <button class="ui-action-btn" id="draw-wipe">CLEAR</button>
         </div>
         <canvas id="draw-board" width="460" height="230" style="background:#ffffff; border:1px solid var(--panel-border); cursor:crosshair; flex:1;"></canvas>
       </div>
@@ -507,15 +474,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function executeApp(key) {
     switch (key) {
-      case "browser": Engine.mount({ id: "browser", title: "Navigator", width: 620, height: 400, construct: Catalog.browser }); break;
-      case "camera": Engine.mount({ id: "camera", title: "Optics Stream", width: 480, height: 360, construct: Catalog.camera }); break;
-      case "calc": Engine.mount({ id: "calc", title: "Arithmetic Unit", width: 310, height: 360, construct: Catalog.calc }); break;
-      case "calendar": Engine.mount({ id: "calendar", title: "Chrono Calendar", width: 330, height: 290, construct: Catalog.calendar }); break;
-      case "themes": Engine.mount({ id: "themes", title: "Display Studio", width: 420, height: 320, construct: Catalog.themes }); break;
-      case "terminal": Engine.mount({ id: "terminal", title: "Virtual Shell", width: 500, height: 300, construct: Catalog.terminal }); break;
-      case "editor": Engine.mount({ id: "editor", title: "Document Editor", width: 460, height: 320, construct: Catalog.editor }); break;
-      case "files": Engine.mount({ id: "files", title: "File Manager", width: 380, height: 240, construct: Catalog.files }); break;
-      case "painter": Engine.mount({ id: "painter", title: "Bit Painter", width: 480, height: 340, construct: Catalog.painter }); break;
+      case "browser":
+        Engine.mount({ id: "browser", title: "Web Navigator", width: 620, height: 400, construct: Catalog.browser });
+        break;
+      case "camera":
+        Engine.mount({ id: "camera", title: "Camera Feed", width: 480, height: 360, construct: Catalog.camera });
+        break;
+      case "calc":
+        Engine.mount({ id: "calc", title: "Calculator", width: 300, height: 340, construct: Catalog.calc });
+        break;
+      case "calendar":
+        Engine.mount({ id: "calendar", title: "Calendar", width: 320, height: 280, construct: Catalog.calendar });
+        break;
+      case "themes":
+        Engine.mount({ id: "themes", title: "Theme Studio", width: 400, height: 300, construct: Catalog.themes });
+        break;
+      case "terminal":
+        Engine.mount({ id: "terminal", title: "Terminal", width: 500, height: 300, construct: Catalog.terminal });
+        break;
+      case "editor":
+        Engine.mount({ id: "editor", title: "Scratchpad", width: 460, height: 320, construct: Catalog.editor });
+        break;
+      case "files":
+        Engine.mount({ id: "files", title: "File Manager", width: 380, height: 240, construct: Catalog.files });
+        break;
+      case "painter":
+        Engine.mount({ id: "painter", title: "Canvas Painter", width: 480, height: 340, construct: Catalog.painter });
+        break;
     }
   }
 
@@ -550,25 +535,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const ctx = document.getElementById("ctx-menu");
   document.getElementById("workspace").addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-    ctx.style.left = `${e.clientX}px`;
-    ctx.style.top = `${e.clientY}px`;
-    ctx.classList.remove("hidden");
-  });
-
-  document.addEventListener("click", () => ctx.classList.add("hidden"));
-
-  ctx.querySelectorAll("[data-action]").forEach(el => {
-    el.addEventListener("click", () => {
-      const act = el.dataset.action;
-      if (act === "browser") executeApp("browser");
-      else if (act === "notes") executeApp("editor");
-      else if (act === "term") executeApp("terminal");
-      else if (act === "themes") executeApp("themes");
-      else if (act === "toggle-dock") dock.classList.toggle("dock-closed");
-      else if (act === "reload") window.location.reload();
-    });
-  });
-
-  executeApp("themes");
-});
+ 
