@@ -3,65 +3,65 @@
 }
 
 body[data-theme="industrial"] {
-  --bg-primary: #090b0e;
-  --panel-fill: #11141a;
-  --panel-border: #232834;
+  --bg-primary: #0a0d12;
+  --panel-fill: #11161f;
+  --panel-border: #242c3d;
   --accent: #ff9800;
   --accent-muted: #805009;
   --text-bright: #e6edf3;
   --text-muted: #8b949e;
-  --win-head: #171b23;
+  --win-head: #161c27;
 }
 
 body[data-theme="phosphor"] {
   --bg-primary: #040804;
-  --panel-fill: #09120a;
-  --panel-border: #16361a;
+  --panel-fill: #0b140c;
+  --panel-border: #1a381e;
   --accent: #22c55e;
   --accent-muted: #134e23;
   --text-bright: #dcfce7;
   --text-muted: #4ade80;
-  --win-head: #0e1d10;
+  --win-head: #102012;
 }
 
 body[data-theme="tactical"] {
-  --bg-primary: #060b14;
-  --panel-fill: #0c1424;
-  --panel-border: #1e2c45;
+  --bg-primary: #070c14;
+  --panel-fill: #0e1726;
+  --panel-border: #1e304d;
   --accent: #38bdf8;
   --accent-muted: #0c4a6e;
   --text-bright: #f0f6fc;
   --text-muted: #7dd3fc;
-  --win-head: #101c33;
+  --win-head: #142238;
 }
 
 body[data-theme="monolith"] {
-  --bg-primary: #0e0708;
-  --panel-fill: #180d0f;
-  --panel-border: #381a1e;
+  --bg-primary: #0d0a0b;
+  --panel-fill: #171113;
+  --panel-border: #382428;
   --accent: #f43f5e;
   --accent-muted: #881337;
   --text-bright: #fff1f2;
   --text-muted: #fda4af;
-  --win-head: #221215;
+  --win-head: #24161a;
 }
 
 body[data-tray="matte"] {
   --bar-fill: var(--panel-fill);
   --bar-border: var(--panel-border);
-  --box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.7);
+  --box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.6);
 }
 
 body[data-tray="cyber"] {
-  --bar-fill: rgba(10, 12, 16, 0.95);
+  --bar-fill: rgba(10, 14, 20, 0.96);
   --bar-border: var(--accent);
-  --box-shadow: 0 0 12px rgba(0, 0, 0, 0.9), inset 0 0 4px var(--accent-muted);
+  --box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 body[data-tray="monolith"] {
   --bar-fill: #000000;
   --bar-border: #333333;
-  --box-shadow: 6px 6px 0px var(--accent);
+  --box-shadow: 4px 4px 0px var(--accent);
 }
 
 *, *::before, *::after {
@@ -94,19 +94,6 @@ body {
   display: block;
 }
 
-.screen-scanline {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.15) 0px,
-    rgba(0, 0, 0, 0.15) 1px,
-    transparent 1px,
-    transparent 2px
-  );
-  pointer-events: none;
-}
-
 #sys-topbar {
   position: fixed;
   top: 0;
@@ -137,10 +124,10 @@ body {
   border-radius: var(--radius-box);
   color: var(--accent);
   cursor: pointer;
-  padding: 3px 7px;
+  padding: 3px 8px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 #pickaxe-menu-trigger:hover {
@@ -149,7 +136,7 @@ body {
 
 .root-tag {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--text-bright);
 }
@@ -217,8 +204,8 @@ body {
 
 .desktop-portal-badge {
   position: absolute;
-  top: 1.5rem;
-  left: 1.5rem;
+  top: 1.25rem;
+  left: 1.25rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -230,8 +217,7 @@ body {
   color: var(--text-bright);
   border-radius: var(--radius-box);
   cursor: pointer;
-  z-index: 10;
-  transition: border-color 0.15s, background 0.15s;
+  z-index: 5;
 }
 
 .desktop-portal-badge:hover {
@@ -255,7 +241,7 @@ body {
 .portal-title {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   letter-spacing: 0.05em;
   color: var(--text-bright);
 }
@@ -268,22 +254,23 @@ body {
 
 #system-hud {
   position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  width: 250px;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 240px;
   background: var(--bar-fill);
   border: 1px solid var(--bar-border);
   border-radius: var(--radius-box);
   box-shadow: var(--box-shadow);
-  padding: 1rem;
+  padding: 0.9rem;
   pointer-events: none;
+  z-index: 5;
 }
 
 .hud-top {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .hud-indicator {
@@ -302,7 +289,7 @@ body {
 }
 
 .hud-time {
-  font-size: 1.85rem;
+  font-size: 1.7rem;
   font-weight: 700;
   font-family: 'JetBrains Mono', monospace;
   color: var(--text-bright);
@@ -313,29 +300,16 @@ body {
   font-size: 0.72rem;
   font-family: 'JetBrains Mono', monospace;
   color: var(--text-muted);
-  margin: 0.35rem 0 0.85rem;
+  margin: 0.3rem 0 0.65rem;
 }
 
 .hud-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-family: 'JetBrains Mono', monospace;
   color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-.hud-meter {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-box);
-  overflow: hidden;
-}
-
-.hud-meter-fill {
-  height: 100%;
-  background: var(--accent);
-  transition: width 0.3s;
+  margin-bottom: 2px;
 }
 
 .aether-win {
@@ -343,7 +317,7 @@ body {
   background: var(--panel-fill);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-box);
-  box-shadow: var(--box-shadow);
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -369,8 +343,8 @@ body {
 }
 
 .ctrl-btn {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border: 1px solid var(--panel-border);
   background: transparent;
   border-radius: var(--radius-box);
@@ -379,7 +353,7 @@ body {
   align-items: center;
   justify-content: center;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   line-height: 1;
   color: var(--text-muted);
 }
@@ -435,8 +409,8 @@ body {
 }
 
 .dock-tile {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-box);
@@ -445,7 +419,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.12s;
 }
 
 .dock-tile:hover {
@@ -483,7 +456,7 @@ body {
   background: var(--bar-fill);
   border: 1px solid var(--bar-border);
   border-radius: var(--radius-box);
-  box-shadow: var(--box-shadow);
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.7);
   z-index: 10001;
   padding: 0.65rem;
 }
@@ -520,7 +493,7 @@ body {
   margin: 0.5rem 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .root-row {
@@ -586,7 +559,7 @@ body {
   background: var(--bar-fill);
   border: 1px solid var(--bar-border);
   border-radius: var(--radius-box);
-  box-shadow: var(--box-shadow);
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.7);
   z-index: 10002;
   padding: 3px 0;
 }
