@@ -1,359 +1,379 @@
-const OS = {
-  theme: localStorage.getItem("AETHER_THEME") || "sakura",
-  style: localStorage.getItem("AETHER_STYLE") || "glass",
-  ram: 42,
-  cameraStream: null,
-  animReq: null
+/**
+ * AETHER-OS WORKSTATION ENGINE
+ * Handcrafted Core - Boxed Geometry, Matrix / Grid Canvas,
+ * Persistent LocalStorage Drivers, and Hardware Telemetry.
+ */
+
+// Core Session State
+const Session = {
+  theme: localStorage.getItem("AETHER_THEME") || "industrial",
+  trayStyle: localStorage.getItem("AETHER_TRAY") || "matte",
+  ramAllocated: 44.8,
+  activeWindowId: null,
+  animFrameId: null,
+  mediaStream: null
 };
 
-// --- SYSTEM RUNNER & METRICS HUD ---
-function initStats() {
-  const menuClock = document.getElementById("menu-clock");
-  const widgetTime = document.getElementById("widget-time");
-  const widgetDate = document.getElementById("widget-date");
-  const menuRam = document.getElementById("menu-ram-stat");
-  const widgetRam = document.getElementById("widget-ram");
-  const widgetRamBar = document.getElementById("widget-ram-bar");
+// --- REAL-TIME TELEMETRY & CLOCK ---
+function bootTelemetry() {
+  const topClock = document.getElementById("top-clock-val");
+  const topRam = document.getElementById("top-ram-val");
+  const hudClock = document.getElementById("hud-clock");
+  const hudCalendar = document.getElementById("hud-calendar");
+  const hudRamText = document.getElementById("hud-ram-text");
+  const hudRamBar = document.getElementById("hud-ram-bar");
 
-  function tick() {
-    const now = new Date();
-    const timeFull = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const timeShort = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const dateStr = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+  function refresh() {
+    const d = new Date();
+    const timeStr = d.toLocaleTimeString([], { hour12: false });
+    const dateStr = d.toLocaleDateString([], { weekday: 'short', month: 'short', day: '2-digit' }).toUpperCase();
 
-    if (menuClock) menuClock.textContent = timeShort;
-    if (widgetTime) widgetTime.textContent = timeFull;
-    if (widgetDate) widgetDate.textContent = dateStr;
+    if (topClock) topClock.textContent = timeStr;
+    if (hudClock) hudClock.textContent = timeStr;
+    if (hudCalendar) hudCalendar.textContent = dateStr;
 
-    const jitter = (Math.random() * 2 - 1).toFixed(1);
-    OS.ram = Math.min(190, Math.max(40, (parseFloat(OS.ram) + parseFloat(jitter)).toFixed(1)));
+    // Small realistic memory fluctuations
+    const delta = (Math.random() * 0.8 - 0.4).toFixed(1);
+    Session.ramAllocated = Math.min(192, Math.max(38, (parseFloat(Session.ramAllocated) + parseFloat(delta)).toFixed(1)));
 
-    if (menuRam) menuRam.textContent = `${OS.ram} MB`;
-    if (widgetRam) widgetRam.textContent = `${OS.ram} MB / 512 MB`;
-    if (widgetRamBar) widgetRamBar.style.width = `${(OS.ram / 512) * 100}%`;
+    if (topRam) topRam.textContent = `${Session.ramAllocated} MB`;
+    if (hudRamText) hudRamText.textContent = `${Session.ramAllocated} / 512 MB`;
+    if (hudRamBar) hudRamBar.style.width = `${(Session.ramAllocated / 512) * 100}%`;
   }
-  setInterval(tick, 1000);
-  tick();
+
+  setInterval(refresh, 1000);
+  refresh();
 }
 
-// --- WALLPAPER CANVAS ENGINE ---
-function initWallpaper() {
-  const canvas = document.getElementById("wallpaper-canvas");
+// --- WALLPAPER & GRID ENGINE ---
+function bootWallpaper() {
+  const canvas = document.getElementById("bg-canvas");
   const ctx = canvas.getContext("2d");
 
-  function resize() {
+  function onResize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   }
-  window.addEventListener("resize", resize);
-  resize();
+  window.addEventListener("resize", onResize);
+  onResize();
 
-  // Sakura Petals
-  const petals = Array.from({ length: 45 }, () => ({
-    x: Math.random() * window.innerWidth,
-    y: Math.random() * window.innerHeight,
-    r: Math.random() * 4 + 2,
-    dx: Math.random() * 1 + 0.5,
-    dy: Math.random() * 1.5 + 0.8
-  }));
-
-  // Matrix Drops
-  const fontSize = 14;
-  let cols = Math.floor(window.innerWidth / fontSize);
+  // Matrix Stream Setup
+  const charSet = "01010123456789ABCDEF!@#$%&*";
+  const step = 14;
+  let cols = Math.floor(window.innerWidth / step);
   let drops = Array(cols).fill(1);
 
-  // Synthwave Grid Offset
-  let synthOffset = 0;
+  // Tactical Grid Setup
+  let gridOffset = 0;
 
-  function render() {
+  function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (OS.theme === "sakura") {
-      ctx.fillStyle = "#ffb6c1";
-      petals.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.y > canvas.height) p.y = -10;
-        if (p.x > canvas.width) p.x = -10;
-      });
-    } else if (OS.theme === "cybermatrix") {
-      ctx.fillStyle = "rgba(1, 8, 3, 0.15)";
+    if (Session.theme === "phosphor") {
+      ctx.fillStyle = "rgba(4, 8, 4, 0.2)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#22c55e";
-      ctx.font = `${fontSize}px monospace`;
-      drops.forEach((y, i) => {
-        const text = String.fromCharCode(0x30A0 + Math.random() * 96);
-        ctx.fillText(text, i * fontSize, y * fontSize);
-        if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
-      });
-    } else if (OS.theme === "minecraft") {
-      ctx.fillStyle = "#1e140d";
-      ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
-      ctx.fillStyle = "#496828";
-      ctx.fillRect(0, canvas.height - 136, canvas.width, 16);
-    } else if (OS.theme === "synthwave") {
-      ctx.strokeStyle = "rgba(244, 63, 94, 0.4)";
-      ctx.lineWidth = 1.5;
-      const horizon = canvas.height * 0.55;
+      ctx.font = `${step}px monospace`;
 
-      synthOffset = (synthOffset + 0.8) % 30;
-      for (let y = horizon; y < canvas.height; y += 22) {
+      for (let i = 0; i < drops.length; i++) {
+        const txt = charSet[Math.floor(Math.random() * charSet.length)];
+        ctx.fillText(txt, i * step, drops[i] * step);
+        if (drops[i] * step > canvas.height && Math.random() > 0.98) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    } else if (Session.theme === "industrial") {
+      // Tech Blueprint Grid
+      ctx.strokeStyle = "rgba(35, 40, 52, 0.45)";
+      ctx.lineWidth = 1;
+      const size = 36;
+
+      for (let x = 0; x < canvas.width; x += size) {
         ctx.beginPath();
-        ctx.moveTo(0, y + synthOffset);
-        ctx.lineTo(canvas.width, y + synthOffset);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
         ctx.stroke();
       }
-      for (let x = 0; x < canvas.width; x += 60) {
+      for (let y = 0; y < canvas.height; y += size) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    } else if (Session.theme === "tactical") {
+      // Horizon Perspective Grid
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
+      ctx.lineWidth = 1;
+      const horizon = canvas.height * 0.6;
+
+      gridOffset = (gridOffset + 0.6) % 24;
+      for (let y = horizon; y < canvas.height; y += 20) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + gridOffset);
+        ctx.lineTo(canvas.width, y + gridOffset);
+        ctx.stroke();
+      }
+      for (let x = -canvas.width; x < canvas.width * 2; x += 80) {
         ctx.beginPath();
         ctx.moveTo(canvas.width / 2, horizon);
-        ctx.lineTo(x * 2 - canvas.width / 2, canvas.height);
+        ctx.lineTo(x, canvas.height);
         ctx.stroke();
       }
-    } else if (OS.theme === "darkvoid") {
-      ctx.fillStyle = "#38bdf8";
-      petals.slice(0, 30).forEach(p => {
-        ctx.fillRect(p.x, p.y, 2, 2);
-        p.y -= 0.4;
-        if (p.y < 0) p.y = canvas.height;
-      });
+    } else if (Session.theme === "monolith") {
+      // Pure deep star drift
+      ctx.fillStyle = "#f43f5e";
+      for (let i = 0; i < 20; i++) {
+        const px = (Math.sin(i * 99 + Date.now() * 0.0002) * 0.5 + 0.5) * canvas.width;
+        const py = (Math.cos(i * 33 + Date.now() * 0.0001) * 0.5 + 0.5) * canvas.height;
+        ctx.fillRect(px, py, 2, 2);
+      }
     }
 
-    OS.animReq = requestAnimationFrame(render);
+    Session.animFrameId = requestAnimationFrame(loop);
   }
 
-  if (OS.animReq) cancelAnimationFrame(OS.animReq);
-  render();
+  if (Session.animFrameId) cancelAnimationFrame(Session.animFrameId);
+  loop();
 }
 
-function applyTheme(name) {
-  OS.theme = name;
+function updateTheme(name) {
+  Session.theme = name;
   document.body.setAttribute("data-theme", name);
   localStorage.setItem("AETHER_THEME", name);
 }
 
-function applyStyle(styleName) {
-  OS.style = styleName;
-  document.body.setAttribute("data-style", styleName);
-  localStorage.setItem("AETHER_STYLE", styleName);
+function updateTrayStyle(styleName) {
+  Session.trayStyle = styleName;
+  document.body.setAttribute("data-tray", styleName);
+  localStorage.setItem("AETHER_TRAY", styleName);
 }
 
-// --- WINDOW MANAGER ---
-class WindowManager {
+// --- WINDOW MANAGER SUBSYSTEM ---
+class WindowEngine {
   constructor() {
-    this.layer = document.getElementById("window-layer");
-    this.windows = new Map();
-    this.topZ = 100;
+    this.container = document.getElementById("window-container");
+    this.pool = new Map();
+    this.depth = 100;
   }
 
-  create({ id, title, width = 540, height = 360, render }) {
-    if (this.windows.has(id)) {
-      this.focus(id);
+  mount({ id, title, width = 520, height = 340, construct }) {
+    if (this.pool.has(id)) {
+      this.bringToFront(id);
       return;
     }
 
-    const win = document.createElement("div");
-    win.className = "aether-window active";
-    win.id = `win-${id}`;
-    win.style.width = `${width}px`;
-    win.style.height = `${height}px`;
-    win.style.top = `${60 + this.windows.size * 25}px`;
-    win.style.left = `${70 + this.windows.size * 25}px`;
-    win.style.zIndex = ++this.topZ;
+    const frame = document.createElement("div");
+    frame.className = "aether-win active";
+    frame.id = `win-node-${id}`;
+    frame.style.width = `${width}px`;
+    frame.style.height = `${height}px`;
+    frame.style.top = `${50 + this.pool.size * 22}px`;
+    frame.style.left = `${60 + this.pool.size * 22}px`;
+    frame.style.zIndex = ++this.depth;
 
-    win.innerHTML = `
-      <div class="window-titlebar">
-        <div class="window-traffic-lights">
-          <button class="win-dot dot-close"></button>
-          <button class="win-dot dot-min"></button>
-          <button class="win-dot dot-max"></button>
+    frame.innerHTML = `
+      <div class="win-titlebar">
+        <div class="win-controls">
+          <button class="ctrl-btn ctrl-close" title="Terminate">×</button>
+          <button class="ctrl-btn ctrl-min" title="Hide">−</button>
+          <button class="ctrl-btn ctrl-max" title="Expand">□</button>
         </div>
-        <div class="window-name">${title}</div>
-        <div style="width: 40px;"></div>
+        <div class="win-caption">${title.toUpperCase()}</div>
+        <div style="width: 45px;"></div>
       </div>
-      <div class="window-body"></div>
+      <div class="win-content"></div>
     `;
 
-    render(win.querySelector(".window-body"), this);
+    construct(frame.querySelector(".win-content"), this);
 
-    win.addEventListener("mousedown", () => this.focus(id));
-    this.bindDrag(win.querySelector(".window-titlebar"), win);
+    frame.addEventListener("mousedown", () => this.bringToFront(id));
+    this.attachDrag(frame.querySelector(".win-titlebar"), frame);
 
-    win.querySelector(".dot-close").onclick = (e) => { e.stopPropagation(); this.close(id); };
-    win.querySelector(".dot-min").onclick = (e) => { e.stopPropagation(); win.classList.add("hidden"); };
-    win.querySelector(".dot-max").onclick = (e) => {
+    frame.querySelector(".ctrl-close").onclick = (e) => {
       e.stopPropagation();
-      win.style.top = win.style.top === "32px" ? "90px" : "32px";
-      win.style.left = win.style.left === "0px" ? "80px" : "0px";
-      win.style.width = win.style.width === "100vw" ? `${width}px` : "100vw";
-      win.style.height = win.style.height === "calc(100vh - 98px)" ? `${height}px` : "calc(100vh - 98px)";
+      this.destroy(id);
     };
 
-    this.layer.appendChild(win);
-    this.windows.set(id, win);
-    this.focus(id);
+    frame.querySelector(".ctrl-min").onclick = (e) => {
+      e.stopPropagation();
+      frame.classList.add("hidden");
+    };
+
+    frame.querySelector(".ctrl-max").onclick = (e) => {
+      e.stopPropagation();
+      const isMax = frame.style.width === "100vw";
+      frame.style.top = isMax ? "70px" : "34px";
+      frame.style.left = isMax ? "70px" : "0px";
+      frame.style.width = isMax ? `${width}px` : "100vw";
+      frame.style.height = isMax ? `${height}px` : "calc(100vh - 34px)";
+    };
+
+    this.container.appendChild(frame);
+    this.pool.set(id, frame);
+    this.bringToFront(id);
   }
 
-  focus(id) {
-    this.windows.forEach(w => w.classList.remove("active"));
-    const target = this.windows.get(id);
+  bringToFront(id) {
+    this.pool.forEach(node => node.classList.remove("active"));
+    const target = this.pool.get(id);
     if (target) {
       target.classList.remove("hidden");
       target.classList.add("active");
-      target.style.zIndex = ++this.topZ;
-      const titleEl = document.getElementById("menubar-app-title");
-      if (titleEl) titleEl.textContent = target.querySelector(".window-name").textContent;
+      target.style.zIndex = ++this.depth;
+      const label = document.getElementById("active-task-label");
+      if (label) label.textContent = target.querySelector(".win-caption").textContent;
     }
   }
 
-  close(id) {
-    const win = this.windows.get(id);
-    if (win) {
-      if (id === "camera" && OS.cameraStream) {
-        OS.cameraStream.getTracks().forEach(track => track.stop());
-        OS.cameraStream = null;
+  destroy(id) {
+    const node = this.pool.get(id);
+    if (node) {
+      if (id === "camera" && Session.mediaStream) {
+        Session.mediaStream.getTracks().forEach(track => track.stop());
+        Session.mediaStream = null;
       }
-      win.remove();
-      this.windows.delete(id);
+      node.remove();
+      this.pool.delete(id);
     }
   }
 
-  bindDrag(handle, target) {
-    let ox = 0, oy = 0, dragging = false;
-    handle.onmousedown = (e) => {
-      dragging = true;
-      ox = e.clientX - target.offsetLeft;
-      oy = e.clientY - target.offsetTop;
+  attachDrag(bar, frame) {
+    let ox = 0, oy = 0, moving = false;
+    bar.onmousedown = (e) => {
+      moving = true;
+      ox = e.clientX - frame.offsetLeft;
+      oy = e.clientY - frame.offsetTop;
     };
     document.addEventListener("mousemove", (e) => {
-      if (!dragging) return;
-      target.style.left = `${e.clientX - ox}px`;
-      target.style.top = `${Math.max(32, e.clientY - oy)}px`;
+      if (!moving) return;
+      frame.style.left = `${e.clientX - ox}px`;
+      frame.style.top = `${Math.max(34, e.clientY - oy)}px`;
     });
-    document.addEventListener("mouseup", () => dragging = false);
+    document.addEventListener("mouseup", () => moving = false);
   }
 }
 
-// --- APPLICATION DIRECTORY ---
-const APPS = {
+// --- APPLICATIONS DIRECTORY ---
+const Catalog = {
   browser(body) {
     body.innerHTML = `
-      <div class="browser-wrap">
+      <div class="browser-view">
         <div class="browser-bar">
-          <input type="text" id="browser-url" class="browser-input" value="https://www.bing.com" />
-          <button class="btn-ui" id="browser-go">Go</button>
+          <input type="text" id="url-in" class="browser-input" value="https://www.bing.com" />
+          <button class="ui-action-btn" id="url-exec">FETCH</button>
         </div>
-        <iframe id="browser-frame" class="browser-frame" src="https://www.bing.com"></iframe>
+        <iframe id="web-frame" class="browser-frame" src="https://www.bing.com"></iframe>
       </div>
     `;
-    const inUrl = body.querySelector("#browser-url");
-    const frame = body.querySelector("#browser-frame");
-    body.querySelector("#browser-go").onclick = () => {
-      let val = inUrl.value.trim();
-      if (!val.startsWith("http://") && !val.startsWith("https://")) {
-        val = "https://www.google.com/search?q=" + encodeURIComponent(val);
+    const input = body.querySelector("#url-in");
+    const frame = body.querySelector("#web-frame");
+    body.querySelector("#url-exec").onclick = () => {
+      let target = input.value.trim();
+      if (!target.startsWith("http://") && !target.startsWith("https://")) {
+        target = "https://www.google.com/search?q=" + encodeURIComponent(target);
       }
-      frame.src = val;
+      frame.src = target;
     };
   },
 
   camera(body) {
     body.innerHTML = `
-      <div class="camera-wrap">
-        <video id="cam-video" class="camera-video" autoplay playsinline></video>
-        <button class="btn-ui" id="snap-btn">Capture Snapshot</button>
-        <canvas id="snap-canvas" class="hidden"></canvas>
+      <div style="display:flex; flex-direction:column; gap:8px; height:100%;">
+        <video id="webcam" style="width:100%; height:230px; background:#000; border:1px solid var(--panel-border); object-fit:cover;" autoplay playsinline></video>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button class="ui-action-btn" id="btn-snap">SNAPSHOT</button>
+          <span style="font-size:0.7rem; font-family:'JetBrains Mono'; color:var(--text-muted);">STREAM // ACTIVE</span>
+        </div>
+        <canvas id="snap-sink" class="hidden"></canvas>
       </div>
     `;
-    const video = body.querySelector("#cam-video");
+    const video = body.querySelector("#webcam");
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
       .then(stream => {
-        OS.cameraStream = stream;
+        Session.mediaStream = stream;
         video.srcObject = stream;
       })
-      .catch(() => alert("Camera permission unavailable or denied."));
+      .catch(() => alert("Hardware stream unavailable."));
 
-    body.querySelector("#snap-btn").onclick = () => {
-      const canvas = body.querySelector("#snap-canvas");
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
-      canvas.getContext("2d").drawImage(video, 0, 0);
-      const link = document.createElement("a");
-      link.download = "aether-snapshot.png";
-      link.href = canvas.toDataURL();
-      link.click();
+    body.querySelector("#btn-snap").onclick = () => {
+      const sink = body.querySelector("#snap-sink");
+      sink.width = video.videoWidth || 640;
+      sink.height = video.videoHeight || 480;
+      sink.getContext("2d").drawImage(video, 0, 0);
+      const a = document.createElement("a");
+      a.download = `aether-capture-${Date.now()}.png`;
+      a.href = sink.toDataURL();
+      a.click();
     };
   },
 
   calc(body) {
     body.innerHTML = `
-      <div style="display:flex; flex-direction:column; height:100%; gap:0.6rem;">
-        <div class="calc-screen" id="calc-disp">0</div>
-        <div class="calc-grid">
-          <button class="calc-btn op" data-c="C">C</button>
-          <button class="calc-btn op" data-c="(">(</button>
-          <button class="calc-btn op" data-c=")">)</button>
-          <button class="calc-btn op" data-c="/">÷</button>
-          <button class="calc-btn" data-c="7">7</button>
-          <button class="calc-btn" data-c="8">8</button>
-          <button class="calc-btn" data-c="9">9</button>
-          <button class="calc-btn op" data-c="*">×</button>
-          <button class="calc-btn" data-c="4">4</button>
-          <button class="calc-btn" data-c="5">5</button>
-          <button class="calc-btn" data-c="6">6</button>
-          <button class="calc-btn op" data-c="-">-</button>
-          <button class="calc-btn" data-c="1">1</button>
-          <button class="calc-btn" data-c="2">2</button>
-          <button class="calc-btn" data-c="3">3</button>
-          <button class="calc-btn op" data-c="+">+</button>
-          <button class="calc-btn" data-c="0">0</button>
-          <button class="calc-btn" data-c=".">.</button>
-          <button class="calc-btn op" data-c="DEL">⌫</button>
-          <button class="calc-btn op" data-c="=" style="background:var(--accent); color:#000;">=</button>
+      <div style="display:flex; flex-direction:column; height:100%; gap:6px;">
+        <div class="calc-display" id="calc-val">0</div>
+        <div class="calc-table">
+          <button class="c-btn op" data-v="CLR">CLR</button>
+          <button class="c-btn op" data-v="(">(</button>
+          <button class="c-btn op" data-v=")">)</button>
+          <button class="c-btn op" data-v="/">/</button>
+          <button class="c-btn" data-v="7">7</button>
+          <button class="c-btn" data-v="8">8</button>
+          <button class="c-btn" data-v="9">9</button>
+          <button class="c-btn op" data-v="*">*</button>
+          <button class="c-btn" data-v="4">4</button>
+          <button class="c-btn" data-v="5">5</button>
+          <button class="c-btn" data-v="6">6</button>
+          <button class="c-btn op" data-v="-">-</button>
+          <button class="c-btn" data-v="1">1</button>
+          <button class="c-btn" data-v="2">2</button>
+          <button class="c-btn" data-v="3">3</button>
+          <button class="c-btn op" data-v="+">+</button>
+          <button class="c-btn" data-v="0">0</button>
+          <button class="c-btn" data-v=".">.</button>
+          <button class="c-btn op" data-v="BS">DEL</button>
+          <button class="c-btn op" data-v="=" style="background:var(--accent); color:#000;">=</button>
         </div>
       </div>
     `;
-    const disp = body.querySelector("#calc-disp");
-    let expr = "";
-    body.querySelectorAll(".calc-btn").forEach(btn => {
-      btn.onclick = () => {
-        const c = btn.dataset.c;
-        if (c === "C") expr = "";
-        else if (c === "DEL") expr = expr.slice(0, -1);
-        else if (c === "=") {
-          try { expr = String(Function(`'use strict'; return (${expr})`)()); }
-          catch { expr = "Error"; }
-        } else expr += c;
-        disp.textContent = expr || "0";
+    const screen = body.querySelector("#calc-val");
+    let state = "";
+    body.querySelectorAll(".c-btn").forEach(b => {
+      b.onclick = () => {
+        const val = b.dataset.v;
+        if (val === "CLR") state = "";
+        else if (val === "BS") state = state.slice(0, -1);
+        else if (val === "=") {
+          try { state = String(Function(`'use strict'; return (${state})`)()); }
+          catch { state = "ERR"; }
+        } else state += val;
+        screen.textContent = state || "0";
       };
     });
   },
 
   calendar(body) {
-    const d = new Date();
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const curMonth = monthNames[d.getMonth()];
-    const curYear = d.getFullYear();
-    const today = d.getDate();
+    const now = new Date();
+    const mList = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    const month = mList[now.getMonth()];
+    const year = now.getFullYear();
+    const day = now.getDate();
+    const totalDays = new Date(year, now.getMonth() + 1, 0).getDate();
 
-    const daysInMonth = new Date(curYear, d.getMonth() + 1, 0).getDate();
-    let daysHtml = "";
-    for (let i = 1; i <= daysInMonth; i++) {
-      daysHtml += `<div class="cal-day-cell ${i === today ? 'active-today' : ''}">${i}</div>`;
+    let gridCells = "";
+    for (let i = 1; i <= totalDays; i++) {
+      gridCells += `<div class="cal-cell ${i === day ? 'today' : ''}">${i}</div>`;
     }
 
     body.innerHTML = `
-      <div class="cal-wrap">
-        <div class="cal-header">${curMonth} ${curYear}</div>
-        <div class="cal-grid-days">
-          <div class="cal-day-head">Su</div><div class="cal-day-head">Mo</div>
-          <div class="cal-day-head">Tu</div><div class="cal-day-head">We</div>
-          <div class="cal-day-head">Th</div><div class="cal-day-head">Fr</div>
-          <div class="cal-day-head">Sa</div>
-          ${daysHtml}
+      <div class="cal-container">
+        <div class="cal-header-bar">${month} // ${year}</div>
+        <div class="cal-matrix">
+          <div class="head">SU</div><div class="head">MO</div>
+          <div class="head">TU</div><div class="head">WE</div>
+          <div class="head">TH</div><div class="head">FR</div>
+          <div class="head">SA</div>
+          ${gridCells}
         </div>
       </div>
     `;
@@ -362,197 +382,204 @@ const APPS = {
   themes(body) {
     body.innerHTML = `
       <div>
-        <div class="theme-section-title">Wallpapers & Aesthetics</div>
-        <div class="studio-grid">
-          <div class="studio-card" data-t="sakura">🌸 Strawberry Sakura</div>
-          <div class="studio-card" data-t="cybermatrix">🟢 CyberMatrix</div>
-          <div class="studio-card" data-t="minecraft">⛏️ Minecraft</div>
-          <div class="studio-card" data-t="synthwave">🌆 Synthwave 80s</div>
-          <div class="studio-card" data-t="darkvoid">🌌 Dark Void</div>
+        <div class="theme-section-tag">// SYSTEM PALETTE</div>
+        <div class="studio-table">
+          <button class="s-btn" data-t="industrial">01 // Industrial Amber</button>
+          <button class="s-btn" data-t="phosphor">02 // Phosphor Matrix</button>
+          <button class="s-btn" data-t="tactical">03 // Tactical Navy</button>
+          <button class="s-btn" data-t="monolith">04 // Monolith Crimson</button>
         </div>
 
-        <div class="theme-section-title" style="margin-top:1.2rem;">Tray & Window Architecture</div>
-        <div class="studio-grid">
-          <div class="studio-card" data-s="glass">💎 Glassmorphism</div>
-          <div class="studio-card" data-s="clay">🧱 Claymorphism (3D)</div>
-          <div class="studio-card" data-s="neon">⚡ Neon Cyber Glow</div>
+        <div class="theme-section-tag" style="margin-top:1rem;">// TRAY INTERFACE GEOMETRY</div>
+        <div class="studio-table">
+          <button class="s-btn" data-s="matte">MODE // Matte Boxed</button>
+          <button class="s-btn" data-s="cyber">MODE // Cyber Grid</button>
+          <button class="s-btn" data-s="monolith">MODE // Monolith Solid</button>
         </div>
       </div>
     `;
-    body.querySelectorAll("[data-t]").forEach(el => el.onclick = () => applyTheme(el.dataset.t));
-    body.querySelectorAll("[data-s]").forEach(el => el.onclick = () => applyStyle(el.dataset.s));
+    body.querySelectorAll("[data-t]").forEach(b => b.onclick = () => updateTheme(b.dataset.t));
+    body.querySelectorAll("[data-s]").forEach(b => b.onclick = () => updateTrayStyle(b.dataset.s));
   },
 
   terminal(body) {
     body.innerHTML = `
-      <div class="term-box">
-        <div class="term-log" id="term-log">
-          <div>Aether-OS Kernel [Shell v3.0 Native Client]</div>
-          <div>Type 'help' to inspect command directory.</div>
+      <div class="term-wrap">
+        <div class="term-scroll" id="term-out">
+          <div>Aether-OS Kernel [x86_64 Node Engine]</div>
+          <div>Type 'help' for executable instructions.</div>
         </div>
-        <div class="term-prompt-row">
-          <span style="color:var(--accent)">user@aether:~$</span>
-          <input type="text" class="term-in" id="term-in" autofocus />
+        <div class="term-in-row">
+          <span class="term-prompt">root@node:~$</span>
+          <input type="text" class="term-input" id="term-input" autofocus />
         </div>
       </div>
     `;
-    const input = body.querySelector("#term-in");
-    const log = body.querySelector("#term-log");
+    const inp = body.querySelector("#term-input");
+    const out = body.querySelector("#term-out");
 
-    input.onkeydown = (e) => {
+    inp.onkeydown = (e) => {
       if (e.key === "Enter") {
-        const cmd = input.value.trim().toLowerCase();
-        const row = document.createElement("div");
-        row.innerHTML = `<span style="color:var(--accent)">user@aether:~$</span> ${cmd}`;
-        log.appendChild(row);
+        const cmd = inp.value.trim().toLowerCase();
+        const line = document.createElement("div");
+        line.innerHTML = `<span class="term-prompt">root@node:~$</span> ${cmd}`;
+        out.appendChild(line);
 
-        const out = document.createElement("div");
-        if (cmd === "help") out.textContent = "Commands: help, clear, date, free, reload";
-        else if (cmd === "clear") { log.innerHTML = ""; input.value = ""; return; }
-        else if (cmd === "date") out.textContent = new Date().toString();
-        else if (cmd === "free") out.textContent = `Active Virtual RAM: ${OS.ram} MB / 512 MB`;
+        const res = document.createElement("div");
+        if (cmd === "help") res.textContent = "Commands: help, clear, date, mem, reload";
+        else if (cmd === "clear") { out.innerHTML = ""; inp.value = ""; return; }
+        else if (cmd === "date") res.textContent = new Date().toISOString();
+        else if (cmd === "mem") res.textContent = `Heap: ${Session.ramAllocated} MB / 512 MB`;
         else if (cmd === "reload") { window.location.reload(); return; }
-        else out.textContent = cmd ? `Command not found: '${cmd}'` : "";
+        else res.textContent = cmd ? `Unknown instruction: '${cmd}'` : "";
 
-        log.appendChild(out);
-        input.value = "";
-        body.scrollTop = body.scrollHeight;
+        out.appendChild(res);
+        inp.value = "";
+        out.scrollTop = out.scrollHeight;
       }
     };
   },
 
   editor(body) {
-    const raw = localStorage.getItem("AETHER_NOTES") || "Welcome to your personal scratchpad.";
+    const disk = localStorage.getItem("AETHER_STORAGE_NOTES") || "Aether-OS persistent document storage.";
     body.innerHTML = `
-      <div style="display:flex; flex-direction:column; height:100%; gap:0.5rem;">
-        <button class="btn-ui" id="save-note" style="align-self:flex-end;">Save</button>
-        <textarea id="note-txt" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--panel-border); border-radius:6px; color:#fff; font-family:inherit; padding:0.75rem; outline:none; resize:none;">${raw}</textarea>
+      <div style="display:flex; flex-direction:column; height:100%; gap:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.7rem; font-family:'JetBrains Mono'; color:var(--text-muted);">/user/storage/notes.txt</span>
+          <button class="ui-action-btn" id="note-write">SYNC DISK</button>
+        </div>
+        <textarea id="note-buffer" style="flex:1; background:#000; border:1px solid var(--panel-border); border-radius:var(--radius-box); color:var(--text-bright); font-family:'JetBrains Mono'; font-size:0.78rem; padding:0.6rem; outline:none; resize:none;">${disk}</textarea>
       </div>
     `;
-    body.querySelector("#save-note").onclick = () => {
-      localStorage.setItem("AETHER_NOTES", body.querySelector("#note-txt").value);
-      alert("Committed note to browser storage.");
+    body.querySelector("#note-write").onclick = () => {
+      localStorage.setItem("AETHER_STORAGE_NOTES", body.querySelector("#note-buffer").value);
+      alert("Committed to browser local storage.");
     };
   },
 
-  files(body, wm) {
+  files(body, engine) {
     body.innerHTML = `
-      <div style="font-size:0.8rem; margin-bottom:0.75rem;">Virtual Disk Hierarchy</div>
-      <div style="display:flex; gap:1rem;">
-        <div class="dock-icon" id="file-item-notes" style="width:70px; height:70px; flex-direction:column; gap:4px; font-size:0.7rem;">
-          <span>📄</span>
-          <span>notes.txt</span>
+      <div style="font-family:'JetBrains Mono'; font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">INDEX OF /user/storage</div>
+      <div style="display:flex; gap:8px;">
+        <div id="file-item" style="border:1px solid var(--panel-border); padding:8px 12px; cursor:pointer; font-family:'JetBrains Mono'; font-size:0.75rem; background:var(--win-head);">
+          📄 notes.txt
         </div>
       </div>
     `;
-    body.querySelector("#file-item-notes").onclick = () => {
-      wm.create({ id: "editor", title: "Notes Editor", render: APPS.editor });
+    body.querySelector("#file-item").onclick = () => {
+      engine.mount({ id: "editor", title: "Document Editor", construct: Catalog.editor });
     };
   },
 
   painter(body) {
     body.innerHTML = `
-      <div style="display:flex; flex-direction:column; height:100%; gap:0.5rem;">
-        <div style="display:flex; gap:0.5rem; align-items:center;">
-          <input type="color" id="p-col" value="#ff7597" />
-          <input type="range" id="p-size" min="1" max="30" value="4" />
-          <button class="btn-ui" id="p-clear">Clear</button>
+      <div style="display:flex; flex-direction:column; height:100%; gap:6px;">
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input type="color" id="draw-color" value="#ff9800" style="background:transparent; border:none; cursor:pointer;" />
+          <input type="range" id="draw-size" min="1" max="24" value="3" />
+          <button class="ui-action-btn" id="draw-wipe">WIPE</button>
         </div>
-        <canvas id="p-board" width="460" height="240" style="background:#fff; border-radius:6px; cursor:crosshair; flex:1;"></canvas>
+        <canvas id="draw-board" width="460" height="230" style="background:#ffffff; border:1px solid var(--panel-border); cursor:crosshair; flex:1;"></canvas>
       </div>
     `;
-    const canvas = body.querySelector("#p-board");
-    const ctx = canvas.getContext("2d");
-    let draw = false;
+    const cvs = body.querySelector("#draw-board");
+    const ctx = cvs.getContext("2d");
+    let active = false;
 
-    canvas.onmousedown = () => draw = true;
-    window.addEventListener("mouseup", () => { draw = false; ctx.beginPath(); });
-    canvas.onmousemove = (e) => {
-      if (!draw) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineWidth = body.querySelector("#p-size").value;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = body.querySelector("#p-col").value;
+    cvs.onmousedown = () => active = true;
+    window.addEventListener("mouseup", () => { active = false; ctx.beginPath(); });
+    cvs.onmousemove = (e) => {
+      if (!active) return;
+      const rect = cvs.getBoundingClientRect();
+      ctx.lineWidth = body.querySelector("#draw-size").value;
+      ctx.lineCap = "square";
+      ctx.strokeStyle = body.querySelector("#draw-color").value;
       ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
       ctx.stroke();
       ctx.beginPath();
       ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
     };
-    body.querySelector("#p-clear").onclick = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+    body.querySelector("#draw-wipe").onclick = () => ctx.clearRect(0, 0, cvs.width, cvs.height);
   }
 };
 
-// --- BOOTSTRAP INITIALIZATION ---
+// --- SUBSYSTEM INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
-  const WM = new WindowManager();
-  initStats();
-  initWallpaper();
-  applyTheme(OS.theme);
-  applyStyle(OS.style);
+  const Engine = new WindowEngine();
+  bootTelemetry();
+  bootWallpaper();
+  updateTheme(Session.theme);
+  updateTrayStyle(Session.trayStyle);
 
-  function openApp(id) {
-    switch(id) {
-      case "browser": WM.create({ id: "browser", title: "AetherWeb", width: 620, height: 420, render: APPS.browser }); break;
-      case "camera": WM.create({ id: "camera", title: "System Camera", width: 500, height: 380, render: APPS.camera }); break;
-      case "calc": WM.create({ id: "calc", title: "Calculator", width: 320, height: 380, render: APPS.calc }); break;
-      case "calendar": WM.create({ id: "calendar", title: "Calendar", width: 340, height: 310, render: APPS.calendar }); break;
-      case "themes": WM.create({ id: "themes", title: "Theme & Tray Studio", width: 440, height: 340, render: APPS.themes }); break;
-      case "terminal": WM.create({ id: "terminal", title: "Terminal Shell", width: 520, height: 320, render: APPS.terminal }); break;
-      case "editor": WM.create({ id: "editor", title: "Notes Editor", width: 460, height: 320, render: APPS.editor }); break;
-      case "files": WM.create({ id: "files", title: "File Manager", width: 400, height: 260, render: APPS.files }); break;
-      case "painter": WM.create({ id: "painter", title: "Canvas Painter", width: 500, height: 360, render: APPS.painter }); break;
+  function executeApp(key) {
+    switch (key) {
+      case "browser": Engine.mount({ id: "browser", title: "Navigator", width: 620, height: 400, construct: Catalog.browser }); break;
+      case "camera": Engine.mount({ id: "camera", title: "Optics Stream", width: 480, height: 360, construct: Catalog.camera }); break;
+      case "calc": Engine.mount({ id: "calc", title: "Arithmetic Unit", width: 310, height: 360, construct: Catalog.calc }); break;
+      case "calendar": Engine.mount({ id: "calendar", title: "Chrono Calendar", width: 330, height: 290, construct: Catalog.calendar }); break;
+      case "themes": Engine.mount({ id: "themes", title: "Display Studio", width: 420, height: 320, construct: Catalog.themes }); break;
+      case "terminal": Engine.mount({ id: "terminal", title: "Virtual Shell", width: 500, height: 300, construct: Catalog.terminal }); break;
+      case "editor": Engine.mount({ id: "editor", title: "Document Editor", width: 460, height: 320, construct: Catalog.editor }); break;
+      case "files": Engine.mount({ id: "files", title: "File Manager", width: 380, height: 240, construct: Catalog.files }); break;
+      case "painter": Engine.mount({ id: "painter", title: "Bit Painter", width: 480, height: 340, construct: Catalog.painter }); break;
     }
   }
 
-  // Bind Dock & Start Menu Listeners
-  document.querySelectorAll("[data-app]").forEach(el => {
-    el.addEventListener("click", () => openApp(el.dataset.app));
+  // Bind Launch Controls
+  document.querySelectorAll("[data-launch]").forEach(btn => {
+    btn.addEventListener("click", () => executeApp(btn.dataset.launch));
   });
 
-  // Floating Side Dock Toggle Button
-  const dock = document.getElementById("dock-container");
-  document.getElementById("dock-toggle-side-btn").onclick = () => {
-    dock.classList.toggle("dock-hidden");
+  // Dock Shelf Toggle
+  const dock = document.getElementById("dock-shelf");
+  document.getElementById("dock-panel-toggle").onclick = () => {
+    dock.classList.toggle("dock-closed");
   };
 
-  // Start Menu (Pickaxe Button + Windows Key)
-  const startBtn = document.getElementById("pickaxe-start-btn");
-  const startMenu = document.getElementById("start-menu");
+  // Root Menu Toggle
+  const rootBtn = document.getElementById("pickaxe-menu-trigger");
+  const rootMenu = document.getElementById("root-menu");
 
-  function toggleStart(e) {
+  function toggleRoot(e) {
     if (e) e.stopPropagation();
-    startMenu.classList.toggle("hidden");
+    rootMenu.classList.toggle("hidden");
   }
 
-  startBtn.addEventListener("click", toggleStart);
+  rootBtn.addEventListener("click", toggleRoot);
   window.addEventListener("keydown", (e) => {
     if (e.key === "Meta" || e.code === "OSLeft" || e.code === "OSRight") {
       e.preventDefault();
-      toggleStart();
+      toggleRoot();
     }
   });
 
-  document.addEventListener("click", () => startMenu.classList.add("hidden"));
-  startMenu.addEventListener("click", (e) => e.stopPropagation());
-  document.getElementById("reboot-os-btn").onclick = () => window.location.reload();
+  document.addEventListener("click", () => rootMenu.classList.add("hidden"));
+  rootMenu.addEventListener("click", (e) => e.stopPropagation());
+  document.getElementById("reboot-trigger").onclick = () => window.location.reload();
 
-  // Desktop Right-Click Context Menu
-  const ctxMenu = document.getElementById("context-menu");
-  document.getElementById("desktop").addEventListener("contextmenu", (e) => {
+  // Desktop Context Menu
+  const ctx = document.getElementById("ctx-menu");
+  document.getElementById("workspace").addEventListener("contextmenu", (e) => {
     e.preventDefault();
-    ctxMenu.style.left = `${e.clientX}px`;
-    ctxMenu.style.top = `${e.clientY}px`;
-    ctxMenu.classList.remove("hidden");
+    ctx.style.left = `${e.clientX}px`;
+    ctx.style.top = `${e.clientY}px`;
+    ctx.classList.remove("hidden");
   });
 
-  document.addEventListener("click", () => ctxMenu.classList.add("hidden"));
-  document.getElementById("ctx-open-browser").onclick = () => openApp("browser");
-  document.getElementById("ctx-new-note").onclick = () => openApp("editor");
-  document.getElementById("ctx-open-term").onclick = () => openApp("terminal");
-  document.getElementById("ctx-change-theme").onclick = () => openApp("themes");
-  document.getElementById("ctx-toggle-dock").onclick = () => dock.classList.toggle("dock-hidden");
-  document.getElementById("ctx-refresh").onclick = () => window.location.reload();
+  document.addEventListener("click", () => ctx.classList.add("hidden"));
 
-  // Default Open App
-  openApp("themes");
+  ctx.querySelectorAll("[data-action]").forEach(el => {
+    el.addEventListener("click", () => {
+      const act = el.dataset.action;
+      if (act === "browser") executeApp("browser");
+      else if (act === "notes") executeApp("editor");
+      else if (act === "term") executeApp("terminal");
+      else if (act === "themes") executeApp("themes");
+      else if (act === "toggle-dock") dock.classList.toggle("dock-closed");
+      else if (act === "reload") window.location.reload();
+    });
+  });
+
+  // Open Themes app on boot
+  executeApp("themes");
 });
