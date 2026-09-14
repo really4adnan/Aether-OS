@@ -1,23 +1,23 @@
 # Aether-OS
 
-A modular web-based desktop environment that runs entirely in the browser.
+A web-based desktop environment built from scratch with vanilla HTML5, CSS3, and JavaScript.
+
+- **Live Demo:** https://aethercube.xyz
+- **Source Code:** https://github.com/really4adnan/Aether-OS
 
 ---
 
-### Who I Am
-I'm Adnan, a high school STEM student and frontend developer from Delhi.
+### Overview
+Aether-OS is a lightweight, zero-dependency browser desktop featuring a custom window manager, draggable application windows, desktop telemetry, and local state persistence.
 
----
+### Key Systems
+- **Custom Window Manager:** Manages window z-index layering, dragging boundaries, and viewport maximize/minimize states using vanilla DOM events.
+- **Persistent LocalStorage Subsystems:** Stores active themes, tray presets, and scratchpad documents across browser sessions.
+- **Canvas-Driven Dynamic Themes:** Renders real-time animated background elements (Matrix rain, tactical horizon lines, and particle fields) via native HTML5 Canvas.
+- **Built-in Applications:** Includes a functional terminal shell, iframe browser, WebRTC camera feed, arithmetic unit, and raster bit-painter.
 
-### Why I Built It
-I built Aether-OS for Hack Club Stardance to push my web development skills further. After making simple static pages, I wanted to build something interactive that felt like a real operating system, without using heavy frameworks or templates.
-
----
-
-### Coding Languages & Tools
-- **HTML5:** Structuring the desktop, window frames, and app layouts
-- **CSS3:** Custom glassmorphic styling, animations, and responsive window panels
-- **JavaScript:** Window management (drag, minimize, maximize), terminal commands, and saving files locally using localStorage
-- **Tools:** Git, GitHub Pages, and VS Code
-
----
+### Local Development
+Clone and open `index.html` directly in any modern browser:
+```bash
+git clone [https://github.com/really4adnan/Aether-OS.git](https://github.com/really4adnan/Aether-OS.git)
+cd Aether-OS
