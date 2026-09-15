@@ -206,7 +206,9 @@ class WindowEngine {
       frame.style.left = `${nextLeft}px`;
       frame.style.top = `${nextTop}px`;
     });
-    document.addEventListener("mouseup", () => moving = false);
+    document.addEventListener("mouseup", () => {
+      moving = false;
+    });
   }
 }
 
@@ -244,13 +246,13 @@ const Catalog = {
       </div>
     `;
     const video = body.querySelector("#webcam");
-    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    navigator.mediaDevices?.getUserMedia({ video: true, audio: false })
       .then(stream => {
         Session.mediaStream = stream;
         video.srcObject = stream;
       })
       .catch(() => {
-        video.insertAdjacentHTML("afterend", "<p style='color:#e11d48; font-size:0.75rem;'>Hardware stream unavailable or permission denied.</p>");
+        video.insertAdjacentHTML("afterend", "<p style='color:#e11d48; font-size:0.75rem; margin-top:4px;'>Hardware stream unavailable or permission denied.</p>");
       });
 
     body.querySelector("#btn-snap").onclick = () => {
@@ -448,7 +450,7 @@ const Catalog = {
     const ctx = cvs.getContext("2d");
     let active = false;
 
-    cvs.onmousedown = () => active = true;
+    cvs.onmousedown = () => { active = true; };
     window.addEventListener("mouseup", () => { active = false; ctx.beginPath(); });
     cvs.onmousemove = (e) => {
       if (!active) return;
@@ -509,19 +511,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const dock = document.getElementById("dock-shelf");
-  document.getElementById("dock-panel-toggle").onclick = () => {
-    dock.classList.toggle("dock-closed");
-  };
+  const dockToggle = document.getElementById("dock-panel-toggle");
+  if (dockToggle && dock) {
+    dockToggle.onclick = () => dock.classList.toggle("dock-closed");
+  }
 
   const rootBtn = document.getElementById("pickaxe-menu-trigger");
   const rootMenu = document.getElementById("root-menu");
 
   function toggleRoot(e) {
     if (e) e.stopPropagation();
-    rootMenu.classList.toggle("hidden");
+    if (rootMenu) rootMenu.classList.toggle("hidden");
   }
 
-  rootBtn.addEventListener("click", toggleRoot);
+  if (rootBtn) rootBtn.addEventListener("click", toggleRoot);
   window.addEventListener("keydown", (e) => {
     if (e.key === "Meta" || e.code === "OSLeft" || e.code === "OSRight") {
       e.preventDefault();
@@ -529,10 +532,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.addEventListener("click", () => rootMenu.classList.add("hidden"));
-  rootMenu.addEventListener("click", (e) => e.stopPropagation());
-  document.getElementById("reboot-trigger").onclick = () => window.location.reload();
+  document.addEventListener("click", () => {
+    if (rootMenu) rootMenu.classList.add("hidden");
+  });
 
-  const ctx = document.getElementById("ctx-menu");
-  document.getElementById("workspace").addEventListener("contextmenu", (e) => {
- 
+  if (rootMenu) {
+    rootMenu.addEventListener("click", (e) => e.stopPropagation());
+  }
+
+  const rebootBtn = 
+document.getElementById("reboot-trigger");
+ if (rebootBtn) rebootBtn.onclick = () => window.location.reload();
+
+ const ctx = document.getElementById("ctx-menu");
+ const workspace = document.getElementById("workspace");
+ if (workspace && ctx) {
+   workspace.addEventListener("contextmenu", (e) => {
+     e.preventDefault();
+     ctx.style.left = `${e.clientX}px`;
+     ctx.style.top = `${e.clientY}px`;
+     ctx.classList.remove("hidden");
+   });
+ }
+
+ document.addEventListener("click", () => {
+   if (ctx) ctx.classList.add("hidden");
+ });
+
+ if (ctx) {
+   ctx.querySelectorAll("[data-action]").forEach(el => {
+     el.addEventListener("click", () => {
+       const act = el.dataset.action;
+       if (act === "browser") executeApp("browser");
+       else if (act === "notes") executeApp("editor");
+       else if (act === "term") executeApp("terminal");
+       else if (act === "themes") executeApp("themes");
+       else if (act === "toggle-dock" && dock) dock.classList.toggle("dock-closed");
+       else if (act === "reload") window.location.reload();
+     });
+   });
+ }
+
+ executeApp("themes");
+});
